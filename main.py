@@ -12,10 +12,6 @@ wsTokenAvailable = True
 Token = ""
 sendTo = ""
 unit = ""
-interval = 0
-recent = "1970-01-01 00:00:00"
-keywords = ""
-words = ""
 
 
 # 获取配置
@@ -31,22 +27,10 @@ def getProperties():
         elif config.__contains__("unit"):
             global unit
             unit = config[config.find("unit=") + 5:config.find("\n")]
-        elif config.__contains__("interval"):
-            global interval
-            interval = config[config.find("interval=") + 9:config.find("\n")]
     print("当前用户Token：" + Token + "\n" +
           "当前任务发送到：" + sendTo + "\n" +
-          "当前发送单位为：" + unit + "\n" +
-          "当前发送间隔为：" + str(interval) + "s\n配置文件读取完毕...\n正在读取关键字...")
-    global keywords
-    keywords = open("keywords.txt", "r", encoding="utf-8")
-    global words
-    for keyword in keywords:
-        if '#' in keyword:
-            continue
-        words = words + keyword.strip('\n')
-    words = words.split(' ')
-    print('当前关键字个数：' + str(len(words)) + '个')
+          "当前发送单位为：" + unit)
+
 
 # 获取wsToken
 def getMessage():
@@ -71,7 +55,6 @@ def getMessage():
     # debug输出
     # print("messageContent : " + msgResponseText)
     # print("getMessageCode : " + str(msgResponse))
-    print("wsToken已获取")
 
 
 def getWarningInfo():
@@ -86,40 +69,39 @@ def getWarningInfo():
     timeNow = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')
     timeArray = datetime.strptime(timeNow, "%Y-%m-%d %H:%M:%S.%f")
     timeStamp = int(time.mktime(timeArray.timetuple()) * 1000.0 + timeArray.microsecond / 1000.0)
-    global recent
-    recent = datetime.strptime(recent, '%Y-%m-%d %H:%M:%S')
-    while True:
-        # 获取预警信息
-        warningInfo = requests.get(
-            "https://yqms.istarshine.com/v4/api/warning/warningInfos?offset=0&limitNum=10&timestamp=" + str(
-                timeStamp) + "&wsToken=" + str(wsToken),
-            headers=warningInfoHeader)
-        warningInfoText = warningInfo.text
-        # debug输出
-        # print("timeStamp : " + str(timeStamp))
-        # print("wsToken : " + wsToken)
-        # print("warningInfoCode : " + str(warningInfo))
-        # print("warningInfoContent : " + warningInfoText)
-        if not warningInfo.ok:
-            global wsTokenAvailable
-            wsTokenAvailable = False
-            return
-        item = json.loads(warningInfoText)["data"][0]
-        dateArray = datetime.fromtimestamp(int(item["warningTime"]) / 1000)
-        date = dateArray.strftime('%Y-%m-%d %H:%M:%S')
-        date = dateArray.strptime(date, '%Y-%m-%d %H:%M:%S')
-        if (recent < date):
-            data = "单位：" + unit + "\n" \
-                   + "链接：" + item["url"] + "\n" \
-                   + "摘要：" + item["summary"] + "\n" \
-                   + "时间：" + str(date) + "\n" \
-                   + "来源：" + item["webName"] + "\n" \
-                   + "作者：" + item["author"] + '\n'
-            for word in words:
-                if word in item["summary"]:
-                    print(data + '摘要包含关键字：【' + word + '】，已发送\n')
-                    # send(data)
+    # 获取预警信息
+    warningInfo = requests.get(
+        "https://yqms.istarshine.com/v4/api/warning/warningInfos?offset=0&limitNum=10&timestamp=" + str(
+            timeStamp) + "&wsToken=" + str(wsToken),
+        headers=warningInfoHeader)
+    warningInfoText = warningInfo.text
+
+    # debug输出
+    # print("timeStamp : " + str(timeStamp))
+    # print("wsToken : " + wsToken)
+    # print("warningInfoCode : " + str(warningInfo))
+    # print("warningInfoContent : " + warningInfoText)
+
+    if not warningInfo.ok:
+        global wsTokenAvailable
+        wsTokenAvailable = False
+        return
+    list = json.loads(warningInfoText)["data"]
+    global lastData
+    for item in list:
+        if lastData == item["url"] or lastData == "":
             break
+        dateArray = datetime.fromtimestamp(int(item["warningTime"]) / 1000)
+        date = dateArray.strftime("%Y-%m-%d %H:%M")
+        data = "单位：" + unit + "\n" \
+               + "链接：" + item["url"] + "\n" \
+               + "摘要：" + item["summary"] + "\n" \
+               + "时间：" + str(date) + "\n" \
+               + "来源：" + item["webName"] + "\n" \
+               + "作者：" + item["author"] + "\n"
+        print(data)
+        send(data)
+    lastData = list[0]["url"]
 
 
 def send(data):
@@ -143,22 +125,17 @@ def openWindow():
     time.sleep(1)
     # 回车进入好友消息界面
     pyautogui.press('enter')
-    print("微信发送界面已打开")
 
 
 def run():
     try:
+
         getProperties()
         getMessage()
         openWindow()
-        print("初始化完成...")
+        print("准备完成")
         while True:
             getWarningInfo()
-            print("进入" + str(interval) + "s间隔时间...")
-            time.sleep(int(interval))
-            print(str(interval) + "s间隔已结束...\n正在监听预设间隔之后的最新消息...")
-            global recent
-            recent = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             if not tokenAvailable:
                 print("WARNING!WARNING!WARNING!   \n当前用户token无效，请重新获取并启动程序")
                 time.sleep(60)
@@ -170,29 +147,7 @@ def run():
         print(e)
 
 
-def runNon():
-    getProperties()
-    getMessage()
-    openWindow()
-    print("初始化完成...")
-    while True:
-        getWarningInfo()
-        print("进入" + str(interval) + "s间隔时间...")
-        time.sleep(int(interval))
-        print(str(interval) + "s间隔已结束...\n正在监听预设间隔之后的最新消息...")
-        global recent
-        recent = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        if not tokenAvailable:
-            print("WARNING!WARNING!WARNING!   \n当前用户token无效，请重新获取并启动程序")
-            time.sleep(60)
-        if not wsTokenAvailable:
-            print("当前wstoken过期，正在重新获取...")
-            getMessage()
-
-
-# run()
-runNon()
+run()
 # openWindow()
 # getWarningInfo()
 # getProperties()
-
