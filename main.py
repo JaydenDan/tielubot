@@ -127,8 +127,8 @@ def getWarningInfo():
 def send(data):
     def play_sound():
         playsound('dingdong.mp3')
+
     threading.Thread(target=play_sound).start()
-    print("23456789aaaa")
     # 复制需要发送的内容到粘贴板
     pyperclip.copy(data)
     # 模拟键盘 ctrl + v 粘贴内容可以先吃个火龙果，我已经拿出来了
@@ -158,12 +158,18 @@ def run():
         getProperties()
         getMessage()
         openWindow()
+
+        def play_sound():
+            playsound('start.wav')
+
+        threading.Thread(target=play_sound).start()
         print("\033[32m准备完成，正在监听...\033[0m")
         while True:
             getWarningInfo()
             if not tokenAvailable:
                 def play_sound():
                     playsound('warning.wav')
+
                 threading.Thread(target=play_sound).start()
                 print("\033[31mWARNING!WARNING!WARNING!   \n当前用户token无效，请重新获取并启动程序\033[0m")
                 time.sleep(60)
@@ -172,7 +178,8 @@ def run():
                 getMessage()
     except Exception as e:
         # 把错误信息打印出来
-        print(e)
+        print('\033[31m程序发生错误，请截图联系管理员并重启程序\n' + str(e) + '\033[0m')
+        playsound('warning.wav')
 
 
 run()
