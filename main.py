@@ -110,16 +110,16 @@ def getWarningInfo():
         dateArray = datetime.fromtimestamp(int(item["warningTime"]) / 1000)
         date = dateArray.strftime('%Y-%m-%d %H:%M:%S')
         date = dateArray.strptime(date, '%Y-%m-%d %H:%M:%S')
-        if (recent < date):
-            data = "\033[33m单位：" + unit + "\n" \
+        if recent < date:
+            data = "单位：" + unit + "\n" \
                    + "链接：" + item["url"] + "\n" \
                    + "摘要：" + item["summary"] + "\n" \
                    + "时间：" + str(date) + "\n" \
                    + "来源：" + item["webName"] + "\n" \
-                   + "作者：" + item["author"] + '\n\033[0m'
+                   + "作者：" + item["author"] + '\n'
             for word in words:
                 if word in item["summary"]:
-                    print(data + '\033[32m摘要包含关键字：【' + word + '】，已发送\n\033[0m')
+                    print('\033[33m' + data + '\033[32m摘要包含关键字：【' + word + '】，已发送\n\033[0m')
                     send(data)
                     break
             break
