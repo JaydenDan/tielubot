@@ -45,5 +45,8 @@ jobs:
         path: |
           舆情预警_关键词过滤_无间隔.exe
           舆情预警_源码.py
+          start.wav
+          warning.wav
+          dingdong.mp3
           properties.txt
           keywords.txt
