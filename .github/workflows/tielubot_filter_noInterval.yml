@@ -38,6 +38,6 @@ jobs:
       with:
         name: tielubot_filter_noInterval
         path: |
-          dist/main.exe
+          ./dist/舆情预警_关键词过滤_无间隔.exe
           properties.txt
           keywords.txt
