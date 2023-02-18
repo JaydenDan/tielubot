@@ -39,15 +39,13 @@ def getProperties():
         if '#' in keyword or len(keyword) == 1:
             continue
         words = words + keyword.strip('\n') + ' '
-        print(words)
-    words = words.split(' ')
-    for word in words:
-        print(word)
+    words = words.rstrip().split(' ')
     print('当前关键字个数：' + str(len(words)) + '个')
 
 
 # 获取wsToken
 def getMessage():
+    print('正在连接服务器...')
     msgHeader = {
         "Host": "yqms.istarshine.com",
         "Accept": "*/*",
@@ -69,6 +67,7 @@ def getMessage():
     # debug输出
     # print("messageContent : " + msgResponseText)
     # print("getMessageCode : " + str(msgResponse))
+    print('wsToken已获取')
 
 
 def getWarningInfo():
@@ -118,7 +117,7 @@ def getWarningInfo():
                 print(data + '摘要包含关键字：【' + word + '】，已发送\n')
                 send(data)
                 break
-    lastData = list[0]["url"]
+    lastData = dataList[0]["url"]
 
 
 def send(data):
@@ -149,7 +148,7 @@ def run():
         getProperties()
         getMessage()
         openWindow()
-        print("准备完成")
+        print("准备完成，正在监听...")
         while True:
             getWarningInfo()
             if not tokenAvailable:
@@ -163,7 +162,7 @@ def run():
         print(e)
 
 
-# run()
+run()
 # openWindow()
 # getWarningInfo()
-getProperties()
+# getProperties()
