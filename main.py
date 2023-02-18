@@ -4,6 +4,9 @@ import json
 import requests
 import time
 from datetime import datetime
+from playsound import playsound
+import threading
+import asyncio
 
 wsToken = ""
 lastData = ""
@@ -122,6 +125,10 @@ def getWarningInfo():
 
 
 def send(data):
+    def play_sound():
+        playsound('dingdong.mp3')
+    threading.Thread(target=play_sound).start()
+    print("23456789aaaa")
     # 复制需要发送的内容到粘贴板
     pyperclip.copy(data)
     # 模拟键盘 ctrl + v 粘贴内容可以先吃个火龙果，我已经拿出来了
@@ -155,6 +162,9 @@ def run():
         while True:
             getWarningInfo()
             if not tokenAvailable:
+                def play_sound():
+                    playsound('warning.wav')
+                threading.Thread(target=play_sound).start()
                 print("\033[31mWARNING!WARNING!WARNING!   \n当前用户token无效，请重新获取并启动程序\033[0m")
                 time.sleep(60)
             if not wsTokenAvailable:
