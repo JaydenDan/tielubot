@@ -1,4 +1,0 @@
-token=NTY2ZWU0YzRlZDQ2NGZkOWI2ZjdmYTMwZTQzMjM1ODJfNDY5MDA=
-sendTo=游标卡尺
-unit=广州局惠州处
-interval=10
