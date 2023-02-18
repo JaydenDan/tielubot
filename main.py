@@ -118,7 +118,7 @@ def getWarningInfo():
             for word in words:
                 if word in item["summary"]:
                     print(data + '摘要包含关键字：【' + word + '】，已发送\n')
-                    # send(data)
+                    send(data)
             break
 
 
