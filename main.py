@@ -36,10 +36,13 @@ def getProperties():
     keywords = open("keywords.txt", "r", encoding="utf-8")
     global words
     for keyword in keywords:
-        if '#' in keyword:
+        if '#' in keyword or len(keyword) == 1:
             continue
-        words = words + keyword.strip('\n')
+        words = words + keyword.strip('\n') + ' '
+        print(words)
     words = words.split(' ')
+    for word in words:
+        print(word)
     print('当前关键字个数：' + str(len(words)) + '个')
 
 
@@ -160,7 +163,7 @@ def run():
         print(e)
 
 
-run()
+# run()
 # openWindow()
 # getWarningInfo()
-# getProperties()
+getProperties()
