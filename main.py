@@ -12,6 +12,8 @@ wsTokenAvailable = True
 Token = ""
 sendTo = ""
 unit = ""
+keywords = ""
+words = ""
 
 
 # 获取配置
@@ -29,7 +31,16 @@ def getProperties():
             unit = config[config.find("unit=") + 5:config.find("\n")]
     print("当前用户Token：" + Token + "\n" +
           "当前任务发送到：" + sendTo + "\n" +
-          "当前发送单位为：" + unit)
+          "当前发送单位为：" + unit + "\n配置文件读取完毕...\n正在读取关键字...")
+    global keywords
+    keywords = open("keywords.txt", "r", encoding="utf-8")
+    global words
+    for keyword in keywords:
+        if '#' in keyword:
+            continue
+        words = words + keyword.strip('\n')
+    words = words.split(' ')
+    print('当前关键字个数：' + str(len(words)) + '个')
 
 
 # 获取wsToken
@@ -86,21 +97,23 @@ def getWarningInfo():
         global wsTokenAvailable
         wsTokenAvailable = False
         return
-    list = json.loads(warningInfoText)["data"]
+    dataList = json.loads(warningInfoText)["data"]
     global lastData
-    for item in list:
+    for item in dataList:
         if lastData == item["url"] or lastData == "":
             break
-        dateArray = datetime.fromtimestamp(int(item["warningTime"]) / 1000)
-        date = dateArray.strftime("%Y-%m-%d %H:%M")
-        data = "单位：" + unit + "\n" \
-               + "链接：" + item["url"] + "\n" \
-               + "摘要：" + item["summary"] + "\n" \
-               + "时间：" + str(date) + "\n" \
-               + "来源：" + item["webName"] + "\n" \
-               + "作者：" + item["author"] + "\n"
-        print(data)
-        send(data)
+        for word in words:
+            if word in item["summary"]:
+                dateArray = datetime.fromtimestamp(int(item["warningTime"]) / 1000)
+                date = dateArray.strftime("%Y-%m-%d %H:%M")
+                data = "单位：" + unit + "\n" \
+                       + "链接：" + item["url"] + "\n" \
+                       + "摘要：" + item["summary"] + "\n" \
+                       + "时间：" + str(date) + "\n" \
+                       + "来源：" + item["webName"] + "\n" \
+                       + "作者：" + item["author"] + "\n"
+                print(data + "关键字：【" + word + "】")
+                send(data)
     lastData = list[0]["url"]
 
 
@@ -129,7 +142,6 @@ def openWindow():
 
 def run():
     try:
-
         getProperties()
         getMessage()
         openWindow()
