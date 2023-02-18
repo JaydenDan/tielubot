@@ -14,6 +14,7 @@ sendTo = ""
 unit = ""
 keywords = ""
 words = ""
+version = "tielubot_filter_noInterval"
 
 
 # 获取配置
@@ -146,6 +147,7 @@ def openWindow():
 
 def run():
     try:
+        print('当前程序版本为：\033[31m' + version + '\033[0m')
         getProperties()
         getMessage()
         openWindow()
