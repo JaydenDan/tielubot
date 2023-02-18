@@ -1,0 +1,7 @@
+/build/
+/dist/
+/idea/
+/venv/
+main.spec
+chromedriver.exe
+._.DS_Store
