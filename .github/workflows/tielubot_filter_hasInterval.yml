@@ -5,9 +5,9 @@ name: tielubot_filter_hasInterval
 
 on:
   push:
-    branches: [ "master" ]
+    branches: [ "interval" ]
   pull_request:
-    branches: [ "master" ]
+    branches: [ "interval" ]
 
 permissions:
   contents: read
