@@ -29,7 +29,7 @@ def getProperties():
         elif config.__contains__("unit"):
             global unit
             unit = config[config.find("unit=") + 5:config.find("\n")]
-    print("当前用户Token：" + Token + "\n" +
+    print("\033[34m当前用户Token：" + Token + "\n" +
           "当前任务发送到：" + sendTo + "\n" +
           "当前发送单位为：" + unit + "\n配置文件读取完毕...\n正在读取关键字...")
     global keywords
@@ -40,12 +40,12 @@ def getProperties():
             continue
         words = words + keyword.strip('\n') + ' '
     words = words.rstrip().split(' ')
-    print('当前关键字个数：' + str(len(words)) + '个')
+    print('当前关键字个数：' + str(len(words)) + '个\033[34m')
 
 
 # 获取wsToken
 def getMessage():
-    print('正在连接服务器...')
+    print('\033[35m正在连接服务器...')
     msgHeader = {
         "Host": "yqms.istarshine.com",
         "Accept": "*/*",
@@ -67,7 +67,7 @@ def getMessage():
     # debug输出
     # print("messageContent : " + msgResponseText)
     # print("getMessageCode : " + str(msgResponse))
-    print('wsToken已获取')
+    print('\033[32mwsToken已获取\033[0m')
 
 
 def getWarningInfo():
@@ -114,7 +114,7 @@ def getWarningInfo():
                        + "时间：" + str(date) + "\n" \
                        + "来源：" + item["webName"] + "\n" \
                        + "作者：" + item["author"] + "\n"
-                print(data + '摘要包含关键字：【' + word + '】，已发送\n')
+                print('\033[33m' + data + '\033[32m摘要包含关键字：【' + word + '】，已发送\n\033[0m')
                 send(data)
                 break
     lastData = dataList[0]["url"]
@@ -141,6 +141,7 @@ def openWindow():
     time.sleep(1)
     # 回车进入好友消息界面
     pyautogui.press('enter')
+    print('\033[32m微信发送页面已打开\033[0m')
 
 
 def run():
@@ -148,14 +149,14 @@ def run():
         getProperties()
         getMessage()
         openWindow()
-        print("准备完成，正在监听...")
+        print("\033[32m准备完成，正在监听...\033[0m")
         while True:
             getWarningInfo()
             if not tokenAvailable:
-                print("WARNING!WARNING!WARNING!   \n当前用户token无效，请重新获取并启动程序")
+                print("\033[31mWARNING!WARNING!WARNING!   \n当前用户token无效，请重新获取并启动程序\033[0m")
                 time.sleep(60)
             if not wsTokenAvailable:
-                print("当前wstoken过期，正在重新获取...")
+                print("\033[33m当前wstoken过期，正在重新获取...\033[33m")
                 getMessage()
     except Exception as e:
         # 把错误信息打印出来
