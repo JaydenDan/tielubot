@@ -16,6 +16,7 @@ interval = 0
 recent = "1970-01-01 00:00:00"
 keywords = ""
 words = ""
+version = "tielubot_filter_hasInterval"
 
 
 # 获取配置
@@ -151,6 +152,7 @@ def openWindow():
 
 def run():
     try:
+        print('当前程序版本为：\033[31m' + version + '\033[0m')
         getProperties()
         getMessage()
         openWindow()
