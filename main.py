@@ -4,6 +4,8 @@ import json
 import requests
 import time
 from datetime import datetime
+from playsound import playsound
+import threading
 
 wsToken = ""
 lastData = ""
@@ -134,6 +136,11 @@ def send(data):
     # 发送消息
     pyautogui.press('enter')
 
+    def play_sound():
+        playsound('dingdong.mp3')
+
+    threading.Thread(target=play_sound).start()
+
 
 def openWindow():
     # Ctrl + alt + w 打开微信
@@ -156,6 +163,11 @@ def run():
         getProperties()
         getMessage()
         openWindow()
+
+        def play_sound():
+            playsound('start.wav')
+
+        threading.Thread(target=play_sound).start()
         print("\033[32m准备完成，正在监听...\033[32m")
         while True:
             getWarningInfo()
@@ -165,6 +177,10 @@ def run():
             global recent
             recent = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             if not tokenAvailable:
+                def play_sound():
+                    playsound('warning.wav')
+
+                threading.Thread(target=play_sound).start()
                 print("\033[31mWARNING!WARNING!WARNING!   \n当前用户token无效，请重新获取并启动程序\033[0m")
                 time.sleep(60)
             if not wsTokenAvailable:
@@ -172,13 +188,15 @@ def run():
                 getMessage()
     except Exception as e:
         # 把错误信息打印出来
-        print(e)
+        print('\033[31m程序发生错误，请截图联系管理员并重启程序\n' + str(e) + '\033[0m')
+        playsound('warning.wav')
 
 
 def runNon():
     getProperties()
     getMessage()
     openWindow()
+
     print("准备完成，正在监听...")
     while True:
         getWarningInfo()
@@ -188,6 +206,10 @@ def runNon():
         global recent
         recent = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         if not tokenAvailable:
+            def play_sound():
+                playsound('warning.mp3')
+
+            threading.Thread(target=play_sound).start()
             print("WARNING!WARNING!WARNING!   \n当前用户token无效，请重新获取并启动程序")
             time.sleep(60)
         if not wsTokenAvailable:
