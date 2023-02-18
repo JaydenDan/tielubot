@@ -34,7 +34,7 @@ def getProperties():
         elif config.__contains__("interval"):
             global interval
             interval = config[config.find("interval=") + 9:config.find("\n")]
-    print("当前用户Token：" + Token + "\n" +
+    print("\033[34m当前用户Token：" + Token + "\n" +
           "当前任务发送到：" + sendTo + "\n" +
           "当前发送单位为：" + unit + "\n" +
           "当前发送间隔为：" + str(interval) + "s\n配置文件读取完毕...\n正在读取关键字...")
@@ -46,12 +46,12 @@ def getProperties():
             continue
         words = words + keyword.strip('\n') + ' '
     words = words.rstrip().split(' ')
-    print('当前关键字个数：' + str(len(words)) + '个')
+    print('当前关键字个数：' + str(len(words)) + '个\033[0m')
 
 
 # 获取wsToken
 def getMessage():
-    print('正在连接服务器...')
+    print('\033[35m正在连接服务器...\033[0m')
     msgHeader = {
         "Host": "yqms.istarshine.com",
         "Accept": "*/*",
@@ -73,7 +73,7 @@ def getMessage():
     # debug输出
     # print("messageContent : " + msgResponseText)
     # print("getMessageCode : " + str(msgResponse))
-    print("wsToken已获取")
+    print("\033[32mwsToken已获取\033[0m")
 
 
 def getWarningInfo():
@@ -111,15 +111,15 @@ def getWarningInfo():
         date = dateArray.strftime('%Y-%m-%d %H:%M:%S')
         date = dateArray.strptime(date, '%Y-%m-%d %H:%M:%S')
         if (recent < date):
-            data = "单位：" + unit + "\n" \
+            data = "\033[33m单位：" + unit + "\n" \
                    + "链接：" + item["url"] + "\n" \
                    + "摘要：" + item["summary"] + "\n" \
                    + "时间：" + str(date) + "\n" \
                    + "来源：" + item["webName"] + "\n" \
-                   + "作者：" + item["author"] + '\n'
+                   + "作者：" + item["author"] + '\n\033[0m'
             for word in words:
                 if word in item["summary"]:
-                    print(data + '摘要包含关键字：【' + word + '】，已发送\n')
+                    print(data + '\033[32m摘要包含关键字：【' + word + '】，已发送\n\033[0m')
                     send(data)
                     break
             break
@@ -146,7 +146,7 @@ def openWindow():
     time.sleep(1)
     # 回车进入好友消息界面
     pyautogui.press('enter')
-    print("微信发送界面已打开")
+    print("\033[32m微信发送界面已打开\033[0m")
 
 
 def run():
@@ -154,7 +154,7 @@ def run():
         getProperties()
         getMessage()
         openWindow()
-        print("初始化完成...")
+        print("\033[32m准备完成，正在监听...\033[32m")
         while True:
             getWarningInfo()
             print("进入" + str(interval) + "s间隔时间...")
@@ -163,10 +163,10 @@ def run():
             global recent
             recent = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             if not tokenAvailable:
-                print("WARNING!WARNING!WARNING!   \n当前用户token无效，请重新获取并启动程序")
+                print("\033[31mWARNING!WARNING!WARNING!   \n当前用户token无效，请重新获取并启动程序\033[0m")
                 time.sleep(60)
             if not wsTokenAvailable:
-                print("当前wstoken过期，正在重新获取...")
+                print("\033[33m当前wstoken过期，正在重新获取...\033[30m")
                 getMessage()
     except Exception as e:
         # 把错误信息打印出来
@@ -177,7 +177,7 @@ def runNon():
     getProperties()
     getMessage()
     openWindow()
-    print("初始化完成...")
+    print("准备完成，正在监听...")
     while True:
         getWarningInfo()
         print("进入" + str(interval) + "s间隔时间...")
