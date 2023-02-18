@@ -42,14 +42,16 @@ def getProperties():
     keywords = open("keywords.txt", "r", encoding="utf-8")
     global words
     for keyword in keywords:
-        if '#' in keyword:
+        if '#' in keyword or len(keyword) == 1:
             continue
-        words = words + keyword.strip('\n')
-    words = words.split(' ')
+        words = words + keyword.strip('\n') + ' '
+    words = words.rstrip().split(' ')
     print('当前关键字个数：' + str(len(words)) + '个')
+
 
 # 获取wsToken
 def getMessage():
+    print('正在连接服务器...')
     msgHeader = {
         "Host": "yqms.istarshine.com",
         "Accept": "*/*",
@@ -191,8 +193,8 @@ def runNon():
             getMessage()
 
 
-# run()
-runNon()
+run()
+# runNon()
 # openWindow()
 # getWarningInfo()
 # getProperties()
