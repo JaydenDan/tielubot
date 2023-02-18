@@ -112,8 +112,9 @@ def getWarningInfo():
                        + "时间：" + str(date) + "\n" \
                        + "来源：" + item["webName"] + "\n" \
                        + "作者：" + item["author"] + "\n"
-                print(data + "关键字：【" + word + "】")
+                print(data + '摘要包含关键字：【' + word + '】，已发送\n')
                 send(data)
+                break
     lastData = list[0]["url"]
 
 
