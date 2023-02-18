@@ -31,9 +31,9 @@ jobs:
       run: |
         pyinstaller -F -i 预警.ico main.py
         echo 'exe打包完成'
-        ren dist/main.exe 舆情预警_关键词过滤_无间隔.exe
+        ren dist/main.exe 舆情预警_关键词过滤_有间隔.exe
         echo 'exe重命名完成'
-        move dist/舆情预警_关键词过滤_无间隔.exe ./
+        move dist/舆情预警_关键词过滤_有间隔.exe ./
         echo 'exe移动完成'
         ren main.py 舆情预警_源码.py
         echo '源码重命名完成'
@@ -43,7 +43,7 @@ jobs:
       with:
         name: tielubot_filter_hasInterval
         path: |
-          舆情预警_关键词过滤_无间隔.exe
+          舆情预警_关键词过滤_有间隔.exe
           舆情预警_源码.py
           properties.txt
           keywords.txt
