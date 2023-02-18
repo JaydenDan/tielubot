@@ -25,7 +25,7 @@ jobs:
         python-version: "3.10"
     - name: Install dependencies
       run: |
-        pip install pyautogui pyperclip requests datetime pyinstaller
+        pip install pyautogui pyperclip requests datetime pyinstaller playsound
     
     - name: pyinstaller
       run: |
