@@ -6,7 +6,7 @@ import time
 from datetime import datetime
 from playsound import playsound
 import threading
-import asyncio
+import os
 
 wsToken = ""
 lastData = ""
@@ -154,6 +154,7 @@ def openWindow():
 
 def run():
     try:
+        os.system("")
         print('当前程序版本为：\033[31m' + version + '\033[0m')
         getProperties()
         getMessage()
@@ -164,6 +165,7 @@ def run():
 
         threading.Thread(target=play_sound).start()
         print("\033[32m准备完成，正在监听...\033[0m")
+        time.sleep(1)
         while True:
             getWarningInfo()
             if not tokenAvailable:
