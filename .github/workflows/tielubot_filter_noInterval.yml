@@ -19,13 +19,28 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-    - name: Set up Python 3.7.0
+    - name: Set up Python 3.9.0
       uses: actions/setup-python@v3
       with:
-        python-version: "3.7.0"
-    - name: Install dependencies
+        python-version: "3.9.0"
+
+    - name: Install virtualenv
+      run: pip install virtualenv
+
+    - name: Create virtual environment
+      run: python -m venv env
+
+    - name: Activate virtual environment and upgrade pip
       run: |
-        pip install playsound pyautogui pyperclip requests datetime pyinstaller
+        .\env\Scripts\activate
+        python -m pip install --upgrade pip
+
+    - name: Install playsound
+      run: pip install playsound
+
+    - name: Install other dependencies
+      run: pip install pyautogui pyperclip requests datetime pyinstaller
+
     
     - name: pyinstaller
       run: |
