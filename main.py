@@ -16,7 +16,7 @@ Token = ""
 sendTo = ""
 unit = ""
 keywords = ""
-words = ""
+words = []
 version = "tielubot_filter_noInterval"
 
 
@@ -35,16 +35,27 @@ def getProperties():
             unit = config[config.find("unit=") + 5:config.find("\n")]
     print("\033[34m当前用户Token：" + Token + "\n" +
           "当前任务发送到：" + sendTo + "\n" +
-          "当前发送单位为：" + unit + "\n配置文件读取完毕...\n正在读取关键字...")
+          "当前发送单位为：" + unit +
+          "\n配置文件读取完毕...\n正在读取关键字...")
     global keywords
     keywords = open("keywords.txt", "r", encoding="utf-8")
+    label = ""
     global words
     for keyword in keywords:
         if '#' in keyword or len(keyword) == 1:
             continue
-        words = words + keyword.strip('\n') + ' '
-    words = words.rstrip().split(' ')
-    print('当前关键字个数：' + str(len(words)) + '个\033[34m')
+        if str(keyword)[0: 3] == "类型：":
+            label = keyword[3:].strip('\n')
+            print("读取到的关键词类型：" + label)
+            continue
+        # 将当前行的关键字通过空格符号拆分为list
+        keywordList = keyword.split(' ')
+        # 给每个关键字加上类别
+        for key in keywordList:
+            key = str(key) + '^' + str(label)
+            # 将处理好的关键字集合加入总集合
+            words.append(key)
+    print('当前关键字个数：' + str(len(words)) + '个\n ' + str(words) + '\033[34m')
 
 
 # 获取wsToken
@@ -109,7 +120,7 @@ def getWarningInfo():
         if lastData == item["url"] or lastData == "":
             break
         for word in words:
-            if word in item["summary"]:
+            if word[0: str(word).index('^')] in item["summary"]:
                 dateArray = datetime.fromtimestamp(int(item["warningTime"]) / 1000)
                 date = dateArray.strftime("%Y-%m-%d %H:%M")
                 data = "单位：" + unit + "\n" \
@@ -117,8 +128,9 @@ def getWarningInfo():
                        + "摘要：" + item["summary"] + "\n" \
                        + "时间：" + str(date) + "\n" \
                        + "来源：" + item["webName"] + "\n" \
-                       + "作者：" + item["author"] + "\n"
-                print('\033[33m' + data + '\033[32m摘要包含关键字：【' + word + '】，已发送\n\033[0m')
+                       + "作者：" + item["author"] + "\n" \
+                       + "分组：【" + word[str(word).index('^')+1:] + "】"
+                print('\033[33m' + data + '\033[32m摘要包含关键字：【' + word[0: str(word).index('^')] + '】，分组：【' + word[str(word).index('^')+1:] + '】已发送\n\033[0m')
                 send(data)
                 break
     lastData = dataList[0]["url"]
@@ -131,25 +143,33 @@ def send(data):
     threading.Thread(target=play_sound).start()
     # 复制需要发送的内容到粘贴板
     pyperclip.copy(data)
-    # 模拟键盘 ctrl + v 粘贴内容可以先吃个火龙果，我已经拿出来了
+    # 模拟键盘 ctrl + v
+    pyautogui.hotkey('ctrl', 'a')
     pyautogui.hotkey('ctrl', 'v')
-    # 发送消息
-    pyautogui.press('enter')
+    # macos
+    # pyautogui.hotkey('command', 'a')
+    # pyautogui.hotkey('command', 'v')
+    # # 发送消息
+    # pyautogui.press('enter')
 
 
 def openWindow():
     # Ctrl + alt + w 打开微信
     pyautogui.hotkey('ctrl', 'alt', 'w')
+    # pyautogui.hotkey('control', 'command', 'w')
     # 搜索好友
     pyautogui.hotkey('ctrl', 'f')
+    # pyautogui.hotkey('command', 'f')
     # 复制好友昵称到粘贴板
     pyperclip.copy(sendTo)
     # 模拟键盘 ctrl + v 粘贴
     pyautogui.hotkey('ctrl', 'v')
+    # pyautogui.hotkey('command', 'v')
     time.sleep(1)
     # 回车进入好友消息界面
     pyautogui.press('enter')
-    print('\033[32m微信发送页面已打开\033[0m')
+    print('\033['
+          '32m微信发送页面已打开\033[0m')
 
 
 def run():
