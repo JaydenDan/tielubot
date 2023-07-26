@@ -36,7 +36,7 @@ jobs:
         python -m pip install --upgrade pip
 
     - name: Install playsound
-      run: pip install playsound
+      run: pip install playsound==1.2.2
 
     - name: Install other dependencies
       run: pip install pyautogui pyperclip requests datetime pyinstaller
