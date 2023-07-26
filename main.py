@@ -129,7 +129,7 @@ def getWarningInfo():
                        + "时间：" + str(date) + "\n" \
                        + "来源：" + item["webName"] + "\n" \
                        + "作者：" + item["author"] + "\n" \
-                       + "分组：【" + word[str(word).index('^')+1:] + "】"
+                       + "类型：" + word[str(word).index('^')+1:]
                 print('\033[33m' + data + '\033[32m摘要包含关键字：【' + word[0: str(word).index('^')] + '】，分组：【' + word[str(word).index('^')+1:] + '】已发送\n\033[0m')
                 send(data)
                 break
