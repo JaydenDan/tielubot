@@ -98,17 +98,31 @@ def getWarningInfo():
     timeArray = datetime.strptime(timeNow, "%Y-%m-%d %H:%M:%S.%f")
     timeStamp = int(time.mktime(timeArray.timetuple()) * 1000.0 + timeArray.microsecond / 1000.0)
     # 获取预警信息
-    warningInfo = requests.get(
-        "https://yqms.istarshine.com/v4/api/warning/warningInfos?offset=0&limitNum=10&timestamp=" + str(
-            timeStamp) + "&wsToken=" + str(wsToken),
-        headers=warningInfoHeader)
-    warningInfoText = warningInfo.text
+    warningInfo = None
+    for i in range(10):
+        if i>0 :
+            print("正在尝试请求预警信息API第【" + str(i + 1) + "】次，若10次后仍然失败，请重启。\n")
+        try:
+            warningInfo = requests.get(
+                "https://yqms.istarshine.com/v4/api/warning/warningInfos?offset=0&limitNum=10&timestamp=" + str(
+                    timeStamp) + "&wsToken=" + str(wsToken),
+                headers=warningInfoHeader)
+            if i > 0:
+                print("重试请求预警信息API第【" + str(i + 1) + "】次结束，若10次后仍然失败，请重启。\n")
+            # 处理状态码异常
+            if warningInfo.status_code == 200:
+                break
+            warningInfo.raise_for_status()
+        except Exception as e:
+            print(e)
+            # 处理状态码异常
+            if warningInfo is not None:
+                print("本次请求失败，状态码：" + str(warningInfo.status_code) + "。\n")
+            else:
+                # 处理请求异常
+                print("接口超时异常\n")
 
-    # debug输出
-    # print("timeStamp : " + str(timeStamp))
-    # print("wsToken : " + wsToken)
-    # print("warningInfoCode : " + str(warningInfo))
-    # print("warningInfoContent : " + warningInfoText)
+    warningInfoText = warningInfo.text
 
     if not warningInfo.ok:
         global wsTokenAvailable
@@ -129,11 +143,12 @@ def getWarningInfo():
                        + "时间：" + str(date) + "\n" \
                        + "来源：" + item["webName"] + "\n" \
                        + "作者：" + item["author"] + "\n" \
-                       + "类型：" + word[str(word).index('^')+1:]
+                       + "类型：" + word[str(word).index('^')+1:] + "\n"
                 print('\033[33m' + data + '\033[32m摘要包含关键字：【' + word[0: str(word).index('^')] + '】，分组：【' + word[str(word).index('^')+1:] + '】已发送\n\033[0m')
                 send(data)
                 break
     lastData = dataList[0]["url"]
+    time.sleep(0.3)
 
 
 def send(data):
@@ -144,8 +159,10 @@ def send(data):
     # 复制需要发送的内容到粘贴板
     pyperclip.copy(data)
     # 模拟键盘 ctrl + v
+
     pyautogui.hotkey('ctrl', 'a')
     pyautogui.hotkey('ctrl', 'v')
+
     # macos
     # pyautogui.hotkey('command', 'a')
     # pyautogui.hotkey('command', 'v')
@@ -187,6 +204,7 @@ def run():
         print("\033[32m准备完成，正在监听...\033[0m")
         time.sleep(1)
         while True:
+            time.sleep(0.3)
             getWarningInfo()
             if not tokenAvailable:
                 def play_sound():
@@ -202,6 +220,9 @@ def run():
         # 把错误信息打印出来
         print('\033[31m程序发生错误，请截图联系管理员并重启程序\n' + str(e) + '\033[0m')
         playsound('warning.wav')
+        while 1==1 :
+            time.sleep(5)
+            print('\033[31m程序发生错误，请截图联系管理员并重启程序\n' + str(e) + '\033[0m')
 
 
 run()
