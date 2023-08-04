@@ -1,4 +1,4 @@
-token=ZDNkM2YxYTFkZGVkNGE0ZWFlYzdkMGZkMzJiYzFlMDVfNDY5MDA=
+token=NmQ2NjlmMTQyZDFiNDRmZTlhY2UyNTJlNzQ5NDdmMTFfNDY5MDA=
 sendTo=文件传输助手
 unit=广州局惠州处
 interval=10

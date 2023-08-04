@@ -9,7 +9,7 @@ import threading
 import os
 
 wsToken = ""
-lastData = ""
+historyUrlSet = set()
 tokenAvailable = True
 wsTokenAvailable = True
 Token = ""
@@ -17,7 +17,7 @@ sendTo = ""
 unit = ""
 keywords = ""
 words = []
-version = "tielubot_filter_noInterval"
+version = "Supervision"
 
 
 # 获取配置
@@ -57,85 +57,106 @@ def getProperties():
             words.append(key)
     print('当前关键字个数：' + str(len(words)) + '个\n ' + str(words) + '\033[34m')
 
-
-# 获取wsToken
-def getMessage():
-    print('\033[35m正在连接服务器...')
-    msgHeader = {
+def getSupervisionInfo():
+    supervisionHead = {
         "Host": "yqms.istarshine.com",
         "Accept": "*/*",
         "Accept-Encoding": "gzip, deflate, br",
         "Connection": "keep-alive",
-        "Token": Token
-    }
-    msgResponse = requests.get('https://yqms.istarshine.com/v4/api/message/async/message', headers=msgHeader)
-    if not msgResponse.ok:
-        global tokenAvailable
-        tokenAvailable = False
-        return
-    msgResponseText = msgResponse.text
-    msgResponseJson = json.loads(msgResponseText)
-    global wsToken
-    wsToken = msgResponseJson["wsToken"]
-    global wsTokenAvailable
-    wsTokenAvailable = True
-    # debug输出
-    # print("messageContent : " + msgResponseText)
-    # print("getMessageCode : " + str(msgResponse))
-    print('\033[32mwsToken已获取\033[0m')
-
-
-def getWarningInfo():
-    warningInfoHeader = {
-        "Host": "yqms.istarshine.com",
-        "Accept": "*/*",
-        "Accept-Encoding": "gzip, deflate, br",
-        "Connection": "keep-alive",
+        "Cache-Control": "no-cache",
+        "Content-Type": "application/json",
+        # "Content-Length": "",
         "Token": Token
     }
     # 获取毫秒级时间戳
     timeNow = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')
     timeArray = datetime.strptime(timeNow, "%Y-%m-%d %H:%M:%S.%f")
     timeStamp = int(time.mktime(timeArray.timetuple()) * 1000.0 + timeArray.microsecond / 1000.0)
+    supervisionData = {
+    "id": "",
+    "subjectType": 1,
+    "timeRange": "2",
+    "infoSource": "",
+    "attitude": ["2"],
+    "sourceRange": "",
+    "mediaType": [],
+    "shortVideoType": [],
+    "tvChannel": [],
+    "tvColumn": [],
+    "isOcr": "",
+    "filterType": "1",
+    "matchRange": "",
+    "firstRegion": "100",
+    "wordRange": "50",
+    "uniqueRegion": True,
+    "weiboTimeFilter": False,
+    "ignoreWeiboLocationWord": False,
+    "ignoreWeiboRemindWord": False,
+    "ignoreWeiboTopicWord": False,
+    "weiboType": ["1"],
+    "weiboAttestType": [],
+    "weiboState": "",
+    "isRepeat": "0",
+    "browseRange": "",
+    "isImportance": False,
+    "noPicture": False,
+    "orderBy": 1,
+    "isHideSummary": False,
+    "customCondition": [],
+    "subjectModule": 1,
+    "refreshType": 2,
+    "pageSize": 30,
+    "sites": [],
+    "industryTags": [],
+    "distinguishType": [],
+    "videoDurationType": [],
+    "regionalMatchType": [],
+    "regionalMatch": [],
+    "subjectArray": [],
+    "sqSourceRange": [],
+    "isFullscreen": False,
+    "warningType": 1,
+    "language": 2,
+    "offset": 0,
+    "limitNum": 30,
+    "timestamp": timeStamp,
+    "activeNav": 1,
+    "backTrack": False
+}
     # 获取预警信息
-    warningInfo = None
+    supervisionInfo = None
     for i in range(10):
-        if i>0 :
+        if i > 0:
             print("正在尝试请求预警信息API第【" + str(i + 1) + "】次，若10次后仍然失败，请重启。\n")
         try:
-            warningInfo = requests.get(
-                "https://yqms.istarshine.com/v4/api/warning/warningInfos?offset=0&limitNum=10&timestamp=" + str(
-                    timeStamp) + "&wsToken=" + str(wsToken),
-                headers=warningInfoHeader)
+            supervisionInfo = requests.post(
+                "https://yqms.istarshine.com/v4/api/subject/infos",
+                headers=supervisionHead, json=supervisionData)
             if i > 0:
                 print("重试请求预警信息API第【" + str(i + 1) + "】次结束，若10次后仍然失败，请重启。\n")
             # 处理状态码异常
-            if warningInfo.status_code == 200:
+            if supervisionInfo.status_code == 200:
                 break
-            warningInfo.raise_for_status()
+            supervisionInfo.raise_for_status()
         except Exception as e:
             print(e)
             # 处理状态码异常
-            if warningInfo is not None:
-                print("本次请求失败，状态码：" + str(warningInfo.status_code) + "。\n")
+            if supervisionInfo is not None:
+                print("本次请求失败，状态码：" + str(supervisionInfo.status_code) + "。\n")
             else:
                 # 处理请求异常
                 print("接口超时异常\n")
 
-    warningInfoText = warningInfo.text
-
-    if not warningInfo.ok:
-        global wsTokenAvailable
-        wsTokenAvailable = False
+    supervisionInfoText = supervisionInfo.text
+    if not supervisionInfo.ok:
         return
-    dataList = json.loads(warningInfoText)["data"]
-    global lastData
+    dataList = json.loads(supervisionInfoText)["data"]["records"]
     for item in dataList:
-        if lastData == item["url"] or lastData == "":
+        if item['url'] in historyUrlSet:
             break
         for word in words:
             if word[0: str(word).index('^')] in item["summary"]:
-                dateArray = datetime.fromtimestamp(int(item["warningTime"]) / 1000)
+                dateArray = datetime.fromtimestamp(int(item["publishTime"]) / 1000)
                 date = dateArray.strftime("%Y-%m-%d %H:%M")
                 data = "单位：" + unit + "\n" \
                        + "链接：" + item["url"] + "\n" \
@@ -143,45 +164,47 @@ def getWarningInfo():
                        + "时间：" + str(date) + "\n" \
                        + "来源：" + item["webName"] + "\n" \
                        + "作者：" + item["author"] + "\n" \
-                       + "类型：" + word[str(word).index('^')+1:] + "\n"
-                print('\033[33m' + data + '\033[32m摘要包含关键字：【' + word[0: str(word).index('^')] + '】，分组：【' + word[str(word).index('^')+1:] + '】已发送\n\033[0m')
+                       + "类型：" + word[str(word).index('^') + 1:] + "\n"
+                print('\033[33m' + data + '\033[32m摘要包含关键字：【' + word[0: str(word).index('^')] +
+                      '】，分组：【' + word[str(word).index('^') + 1:] + '】已发送\n\033[0m')
                 send(data)
+                historyUrlSet.add(item['url'])
                 break
-    lastData = dataList[0]["url"]
-    time.sleep(0.3)
-
+        if len(historyUrlSet) == 0:
+            # 意思是每次刚启动程序，只发送一次最新消息。
+            break
+    time.sleep(0.2)
 
 def send(data):
     def play_sound():
         playsound('dingdong.mp3')
-
     threading.Thread(target=play_sound).start()
     # 复制需要发送的内容到粘贴板
     pyperclip.copy(data)
     # 模拟键盘 ctrl + v
+    # pyautogui.hotkey('ctrl', 'a')
+    # pyautogui.hotkey('ctrl', 'v')
 
-    pyautogui.hotkey('ctrl', 'a')
-    pyautogui.hotkey('ctrl', 'v')
-
-    # macos
-    # pyautogui.hotkey('command', 'a')
+    # MacOS
+    # pyautogui.hotkey('command', 'awf')
     # pyautogui.hotkey('command', 'v')
-    # # 发送消息
+
+    # 发送消息
     # pyautogui.press('enter')
 
 
 def openWindow():
     # Ctrl + alt + w 打开微信
     pyautogui.hotkey('ctrl', 'alt', 'w')
-    # pyautogui.hotkey('control', 'command', 'w')
-    # 搜索好友
     pyautogui.hotkey('ctrl', 'f')
-    # pyautogui.hotkey('command', 'f')
-    # 复制好友昵称到粘贴板
     pyperclip.copy(sendTo)
-    # 模拟键盘 ctrl + v 粘贴
     pyautogui.hotkey('ctrl', 'v')
+    # MacOS
+    # pyautogui.hotkey('control', 'command', 'w')
+    # pyautogui.hotkey('command', 'f')
     # pyautogui.hotkey('command', 'v')
+
+    # 模拟键盘 ctrl + v 粘贴
     time.sleep(1)
     # 回车进入好友消息界面
     pyautogui.press('enter')
@@ -194,9 +217,7 @@ def run():
         os.system("")
         print('当前程序版本为：\033[31m' + version + '\033[0m')
         getProperties()
-        getMessage()
-        openWindow()
-
+        # openWindow()
         def play_sound():
             playsound('start.wav')
 
@@ -204,18 +225,7 @@ def run():
         print("\033[32m准备完成，正在监听...\033[0m")
         time.sleep(1)
         while True:
-            time.sleep(0.3)
-            getWarningInfo()
-            if not tokenAvailable:
-                def play_sound():
-                    playsound('warning.wav')
-
-                threading.Thread(target=play_sound).start()
-                print("\033[31mWARNING!WARNING!WARNING!   \n当前用户token无效，请重新获取并启动程序\033[0m")
-                time.sleep(60)
-            if not wsTokenAvailable:
-                print("\033[33m当前wstoken过期，正在重新获取...\033[33m")
-                getMessage()
+            getSupervisionInfo()
     except Exception as e:
         # 把错误信息打印出来
         print('\033[31m程序发生错误，请截图联系管理员并重启程序\n' + str(e) + '\033[0m')
@@ -226,6 +236,3 @@ def run():
 
 
 run()
-# openWindow()
-# getWarningInfo()
-# getProperties()
