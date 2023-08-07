@@ -182,15 +182,15 @@ def send(data):
     # 复制需要发送的内容到粘贴板
     pyperclip.copy(data)
     # 模拟键盘 ctrl + v
-    # pyautogui.hotkey('ctrl', 'a')
-    # pyautogui.hotkey('ctrl', 'v')
+    pyautogui.hotkey('ctrl', 'a')
+    pyautogui.hotkey('ctrl', 'v')
 
     # MacOS
-    # pyautogui.hotkey('command', 'awf')
+    # pyautogui.hotkey('command', 'a')
     # pyautogui.hotkey('command', 'v')
 
     # 发送消息
-    # pyautogui.press('enter')
+    pyautogui.press('enter')
 
 
 def openWindow():
@@ -217,10 +217,9 @@ def run():
         os.system("")
         print('当前程序版本为：\033[31m' + version + '\033[0m')
         getProperties()
-        # openWindow()
+        openWindow()
         def play_sound():
             playsound('start.wav')
-
         threading.Thread(target=play_sound).start()
         print("\033[32m准备完成，正在监听...\033[0m")
         time.sleep(1)
