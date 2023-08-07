@@ -190,7 +190,7 @@ def send(data):
     # pyautogui.hotkey('command', 'v')
 
     # 发送消息
-    pyautogui.press('enter')
+    # pyautogui.press('enter')
 
 
 def openWindow():
