@@ -10,6 +10,8 @@ import os
 
 wsToken = ""
 historyUrlSet = set()
+autoSend = False
+attitude = ''
 tokenAvailable = True
 wsTokenAvailable = True
 Token = ""
@@ -24,19 +26,33 @@ version = "Supervision"
 def getProperties():
     properties = open("properties.txt", "r", encoding="utf-8")
     for config in properties:
-        if config.__contains__("token"):
+        if '#' in config or len(config) == 1:
+            continue
+        elif config.startswith("token"):
             global Token
             Token = config[config.find("token=") + 6:config.find("\n")]
-        elif config.__contains__("sendTo"):
+        elif config.startswith("sendTo"):
             global sendTo
             sendTo = config[config.find("sendTo=") + 7:config.find("\n")]
-        elif config.__contains__("unit"):
+        elif config.startswith("unit"):
             global unit
             unit = config[config.find("unit=") + 5:config.find("\n")]
+        elif config.startswith("autoSend"):
+            switch = config[config.find("autoSend=") + 9:config.find("\n")]
+            if switch.lower() in ['on', '开']:
+                global autoSend
+                autoSend = True
+        elif config.startswith("attitude"):
+            attitudes = config[config.find("attitude=") + 9:config.find("\n")]
+            global attitude
+            attitude = attitudes.split('+')
+
     print("\033[34m当前用户Token：" + Token + "\n" +
           "当前任务发送到：" + sendTo + "\n" +
-          "当前发送单位为：" + unit +
-          "\n配置文件读取完毕...\n正在读取关键字...")
+          "当前发送单位为：" + unit + "\n" +
+          "当前是否开启自动发送：" + str(autoSend) + "\n" +
+          "当前倾向性选择：" + str(attitude) + "\n" +
+          "配置文件读取完毕...\n正在读取关键字...")
     global keywords
     keywords = open("keywords.txt", "r", encoding="utf-8")
     label = ""
@@ -77,7 +93,7 @@ def getSupervisionInfo():
     "subjectType": 1,
     "timeRange": "2",
     "infoSource": "",
-    "attitude": ["2"],
+    "attitude": attitude,
     "sourceRange": "",
     "mediaType": [],
     "shortVideoType": [],
@@ -146,7 +162,6 @@ def getSupervisionInfo():
             else:
                 # 处理请求异常
                 print("接口超时异常\n")
-
     supervisionInfoText = supervisionInfo.text
     if not supervisionInfo.ok:
         return
@@ -170,8 +185,9 @@ def getSupervisionInfo():
                 send(data)
                 historyUrlSet.add(item['url'])
                 break
-        if len(historyUrlSet) == 0:
+        if len(historyUrlSet) <= 1:
             # 意思是每次刚启动程序，只发送一次最新消息。
+            # print('如果是第一次处理，只处理一条消息')
             break
     time.sleep(0.2)
 
@@ -190,7 +206,8 @@ def send(data):
     # pyautogui.hotkey('command', 'v')
 
     # 发送消息
-    # pyautogui.press('enter')
+    if autoSend:
+        pyautogui.press('enter')
 
 
 def openWindow():

@@ -2,3 +2,9 @@ token=NmQ2NjlmMTQyZDFiNDRmZTlhY2UyNTJlNzQ5NDdmMTFfNDY5MDA=
 sendTo=文件传输助手
 unit=广州局惠州处
 interval=10
+# 是否开启自动发送,开启用on或开，其他值关闭
+autoSend=on
+# 负面=2，中性=3，连接用+
+attitude=2+3
+
+# ->【此行放在配置内容最下方】-<
