@@ -46,22 +46,24 @@ jobs:
       run: |
         pyinstaller -F -i 预警.ico main.py
         echo 'exe打包完成'
-        ren dist/main.exe 舆情预警_关键词过滤_无间隔.exe
+        ren dist/main.exe 舆情预警.exe
         echo 'exe重命名完成'
-        move dist/舆情预警_关键词过滤_无间隔.exe ./
+        move dist/舆情预警.exe ./
         echo 'exe移动完成'
         ren main.py 舆情预警_源码.py
         echo '源码重命名完成'
 
     - name: Set time
-      run: echo "TIME_SUFFIX=$(TZ='Asia/Shanghai' date +'%Y-%m-%d_%H:%M:%S')" >> $GITHUB_ENV
-        
+      run: |
+        $beijingTime = (Get-Date).AddHours(8).ToString("yyyy-MM-dd_HH:mm:ss")
+        echo "TIME_SUFFIX=$beijingTime" | Out-File -Append -FilePath $env:GITHUB_ENV -Encoding utf8
+
     - name: Archive production artifacts
       uses: actions/upload-artifact@v3
       with:
         name: 舆情小程序_${{ env.TIME_SUFFIX }}
         path: |
-          舆情预警_关键词过滤_无间隔.exe
+          舆情预警.exe
           舆情预警_源码.py
           start.wav
           warning.wav
